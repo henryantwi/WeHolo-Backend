@@ -6,7 +6,7 @@ from app.models.base import Base
 
 # Create SQLAlchemy engine
 engine = create_engine(
-    settings.DATABASE_URL, connect_args={"check_same_thread": False}
+    settings.DATABASE_URL
 )
 
 # Create SessionLocal class

@@ -18,17 +18,23 @@ WeHolo is an online platform that provides users with a fun and interactive expe
 ## Technology Stack
 
 - **Backend**: FastAPI, SQLAlchemy, Pydantic
-- **Database**: SQLite (development), PostgreSQL (production)
+- **Database**: PostgreSQL
 - **Authentication**: JWT (JSON Web Tokens)
 - **APIs**: AKOOL API, Soul Machines API
+- **Containerization**: Docker, Docker Compose
 
 ## Installation
 
 ### Prerequisites
 
+#### For Local Development
 - Python 3.8+
 - pip (Python package manager)
 - Virtual environment (recommended)
+
+#### For Docker Deployment
+- Docker
+- Docker Compose
 
 ### Setup
 
@@ -52,10 +58,16 @@ WeHolo is an online platform that provides users with a fun and interactive expe
    pip install -r requirements.txt
    ```
 
-4. Create a `.env` file based on `.env.example`:
+4. Create environment files:
    ```bash
+   # For local development
    cp .env.example .env
    # Edit .env with your configuration
+
+   # For Docker deployment
+   cp .env.web.example .env.web
+   cp .env.db.example .env.db
+   # Edit .env.web and .env.db with your configuration
    ```
 
 5. Initialize the database:
@@ -78,6 +90,39 @@ The API will be available at http://localhost:8000
 ```bash
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
+
+### Docker
+
+The application can be run using Docker and Docker Compose:
+
+1. Set up environment files:
+   ```bash
+   cp .env.web.example .env.web
+   cp .env.db.example .env.db
+   # Edit .env.web and .env.db with your configuration
+   ```
+
+2. Build and start the containers:
+   ```bash
+   docker-compose up -d
+   ```
+
+3. The API will be available at http://localhost:8000
+
+   > **Note:** Database migrations are automatically applied when the container starts. If you need to manually apply migrations, you can use:
+   > ```bash
+   > docker-compose exec web alembic upgrade head
+   > ```
+
+5. To stop the containers:
+   ```bash
+   docker-compose down
+   ```
+
+6. To view logs:
+   ```bash
+   docker-compose logs -f
+   ```
 
 ## API Documentation
 
@@ -103,8 +148,18 @@ weholo-project/
 │   ├── models/               # SQLAlchemy models
 │   ├── schemas/              # Pydantic schemas
 │   └── services/             # Business logic
-├── .env                      # Environment variables (not in version control)
-├── .env.example              # Example environment variables
+├── scripts/                  # Utility scripts
+│   ├── entrypoint.sh         # Docker container entrypoint script
+│   └── wait_for_db.py        # Script to wait for database to be ready
+├── .dockerignore             # Files to exclude from Docker image
+├── .env                      # Environment variables for local development
+├── .env.example              # Example environment variables for local development
+├── .env.web                  # Environment variables for web service in Docker
+├── .env.web.example          # Example environment variables for web service
+├── .env.db                   # Environment variables for database service in Docker
+├── .env.db.example           # Example environment variables for database service
+├── docker-compose.yml        # Docker Compose configuration
+├── Dockerfile                # Docker image definition
 ├── main.py                   # Application entry point
 ├── pyproject.toml            # Project metadata
 ├── requirements.txt          # Dependencies

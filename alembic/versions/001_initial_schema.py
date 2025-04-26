@@ -7,7 +7,6 @@ Create Date: 2025-04-26
 """
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import sqlite
 
 # revision identifiers, used by Alembic.
 revision = '001'
@@ -46,9 +45,9 @@ def upgrade():
         sa.Column('image_url', sa.String(), nullable=True),
         sa.Column('provider', sa.String(), nullable=False),
         sa.Column('provider_id', sa.String(), nullable=True),
-        sa.Column('behavior_settings', sqlite.JSON(), nullable=True),
-        sa.Column('appearance_settings', sqlite.JSON(), nullable=True),
-        sa.Column('voice_settings', sqlite.JSON(), nullable=True),
+        sa.Column('behavior_settings', sa.JSON(), nullable=True),
+        sa.Column('appearance_settings', sa.JSON(), nullable=True),
+        sa.Column('voice_settings', sa.JSON(), nullable=True),
         sa.Column('user_id', sa.Integer(), nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
@@ -106,7 +105,7 @@ def upgrade():
         sa.Column('avatar_id', sa.Integer(), nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('conversation_metadata', sqlite.JSON(), nullable=True),
+        sa.Column('conversation_metadata', sa.JSON(), nullable=True),
         sa.ForeignKeyConstraint(['avatar_id'], ['avatar.id'], ),
         sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
         sa.PrimaryKeyConstraint('id')
