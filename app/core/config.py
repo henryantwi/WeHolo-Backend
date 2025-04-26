@@ -20,7 +20,11 @@ class Settings(BaseSettings):
     
     # Project directories
     BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
-    
+
+    # Environment
+    DEBUG: bool = True
+    ENVIRONMENT: str = "development"
+
     class Config:
         env_file = ".env"
         case_sensitive = True
