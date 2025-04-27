@@ -1,0 +1,32 @@
+POST http://127.0.0.1:8000/api/auth/signup
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "full_name": "User Name",
+  "is_active": true,
+  "is_superuser": true,
+  "language": "en",
+  "ui_theme": "dark",
+  "camera_mode": "standard",
+  "password": "pass123"
+}
+
+###
+
+POST http://127.0.0.1:8000/api/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+username=user@example.com&password=pass123
+
+###
+
+POST http://127.0.0.1:8000/api/chat/conversations
+Content-Type: application/json
+
+{
+  "title": "Conversation 1",
+  "conversation_metadata": {},
+  "user_id": 1,
+  "avatar_id": 0
+}
