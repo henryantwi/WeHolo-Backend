@@ -40,7 +40,7 @@ WeHolo is an online platform that provides users with a fun and interactive expe
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/weholo-project.git
+   git clone https://github.com/henryantwi/weholo-project.git
    cd weholo-project
    ```
 
