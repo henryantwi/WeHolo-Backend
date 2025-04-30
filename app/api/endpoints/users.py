@@ -7,6 +7,7 @@ from app.api.deps import get_db, get_current_active_user, get_current_active_sup
 from app.core.security import get_password_hash, verify_password
 from app.models.user import User
 from app.schemas.user import User as UserSchema, UserCreate, UserUpdate
+from icecream import ic
 
 router = APIRouter()
 
@@ -29,6 +30,8 @@ def update_user_me(
     """
     Update own user.
     """
+    ic(dict(user_in))
+
     if user_in.password is not None:
         hashed_password = get_password_hash(user_in.password)
         current_user.hashed_password = hashed_password
@@ -48,7 +51,7 @@ def update_user_me(
     if user_in.camera_mode is not None:
         current_user.camera_mode = user_in.camera_mode
     
-    db.add(current_user)
+    db.merge(current_user)
     db.commit()
     db.refresh(current_user)
     return current_user

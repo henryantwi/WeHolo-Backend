@@ -40,6 +40,8 @@ ENV/
 Dockerfile
 docker-compose.yml
 
+!scripts/entrypoint.sh
+
 # Database
 *.db
 *.sqlite3

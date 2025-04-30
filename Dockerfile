@@ -1,4 +1,4 @@
-FROM python:3.13.3-slim-bookworm
+FROM python:3.12.10-slim-bookworm
 
 WORKDIR /app
 
@@ -14,4 +14,4 @@ RUN chmod +x /app/scripts/entrypoint.sh
 EXPOSE 8000
 
 # Use the entrypoint script
-ENTRYPOINT ["/app/scripts/entrypoint.sh"]
+CMD ["/app/scripts/entrypoint.sh"]
