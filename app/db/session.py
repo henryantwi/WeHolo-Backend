@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import DBAPIError, OperationalError, DisconnectionError
 from sqlalchemy.pool import QueuePool
@@ -78,7 +78,7 @@ def get_db():
     
     try:
         # Test connection with a simple query
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         yield db
     except (OperationalError, DBAPIError, DisconnectionError) as e:
         logger.error(f"Database connection error: {str(e)}")
@@ -90,7 +90,7 @@ def get_db():
                 db.close()
                 time.sleep(retry_delay)
                 db = SessionLocal()
-                db.execute("SELECT 1")
+                db.execute(text("SELECT 1"))
                 logger.info("Successfully reconnected to database")
                 yield db
                 break

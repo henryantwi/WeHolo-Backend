@@ -8,8 +8,8 @@ services:
         condition: service_healthy
     env_file:
       - .env.web
-    # environment:
-    #   - DATABASE_URL=postgresql://weholo:weholo@db:5432/weholo
+    environment:
+      - DATABASE_URL=postgresql://weholo:weholo@db:5432/weholo
     volumes:
       - ./:/app
     restart: always
@@ -27,10 +27,10 @@ services:
       - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
     env_file:
       - .env.db
-    # environment:
-    #   - POSTGRES_PASSWORD=postgres
-    #   - POSTGRES_USER=postgres
-    #   - POSTGRES_DB=postgres
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
     ports:
       - "5432:5432"
     restart: always
