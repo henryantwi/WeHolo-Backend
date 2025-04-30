@@ -32,29 +32,36 @@ def update_user_me(
     """
     ic(dict(user_in))
 
+    # Query the user from the database to ensure we're working with a session-tracked instance
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
     if user_in.password is not None:
         hashed_password = get_password_hash(user_in.password)
-        current_user.hashed_password = hashed_password
+        user.hashed_password = hashed_password
     
     if user_in.full_name is not None:
-        current_user.full_name = user_in.full_name
+        user.full_name = user_in.full_name
     
     if user_in.email is not None:
-        current_user.email = user_in.email
+        user.email = user_in.email
     
     if user_in.language is not None:
-        current_user.language = user_in.language
+        user.language = user_in.language
     
     if user_in.ui_theme is not None:
-        current_user.ui_theme = user_in.ui_theme
+        user.ui_theme = user_in.ui_theme
     
     if user_in.camera_mode is not None:
-        current_user.camera_mode = user_in.camera_mode
+        user.camera_mode = user_in.camera_mode
     
-    db.merge(current_user)
     db.commit()
-    db.refresh(current_user)
-    return current_user
+    db.refresh(user)
+    return user
 
 @router.get("/{user_id}", response_model=UserSchema)
 def read_user_by_id(
