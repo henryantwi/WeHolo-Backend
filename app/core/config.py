@@ -3,6 +3,10 @@ from typing import Optional, List
 import secrets
 from pathlib import Path
 
+from icecream import ic
+
+ic.disable()
+
 class Settings(BaseSettings):
     API_V1_STR: str = "/api"
     SECRET_KEY: str = secrets.token_urlsafe(32)
