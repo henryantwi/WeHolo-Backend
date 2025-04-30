@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import Optional, List
+from typing import Optional, List, Union
 import secrets
 from pathlib import Path
 
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://weholo:weholo@db:5432/weholo"
     
     # CORS
-    BACKEND_CORS_ORIGINS: List[str] = ["*"]
+    BACKEND_CORS_ORIGINS: Union[List[str], List[None]] = ["*"]
     
     # API Keys
     AKOOL_API_KEY: Optional[str] = None
@@ -26,11 +26,13 @@ class Settings(BaseSettings):
     BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
 
     # Environment
-    DEBUG: bool = True
-    ENVIRONMENT: str = "development"
+    DEBUG: bool = False
+    ENVIRONMENT: str = "production"
 
     class Config:
         env_file = ".env"
         case_sensitive = True
 
 settings = Settings()
+
+ic(settings.BACKEND_CORS_ORIGINS)

@@ -62,7 +62,7 @@ def create_user(
         hashed_password=get_password_hash(user_in.password),
         full_name=user_in.full_name,
         is_active=True,
-        is_superuser=True,
+        is_superuser=False,
         language=user_in.language,
         ui_theme=user_in.ui_theme,
         camera_mode=user_in.camera_mode,
