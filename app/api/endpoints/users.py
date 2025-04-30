@@ -7,7 +7,6 @@ from app.api.deps import get_db, get_current_active_user, get_current_active_sup
 from app.core.security import get_password_hash, verify_password
 from app.models.user import User
 from app.schemas.user import User as UserSchema, UserCreate, UserUpdate
-from icecream import ic
 
 router = APIRouter()
 
@@ -30,7 +29,6 @@ def update_user_me(
     """
     Update own user.
     """
-    ic(dict(user_in))
 
     # Query the user from the database to ensure we're working with a session-tracked instance
     user = db.query(User).filter(User.id == current_user.id).first()

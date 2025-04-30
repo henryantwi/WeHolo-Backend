@@ -1,7 +1,9 @@
 from typing import Any, Dict, List, Optional
+import time
 
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import OperationalError, DBAPIError, DisconnectionError
 
 from app.api.deps import get_db, get_current_active_user
 from app.core.config import settings
@@ -41,48 +43,73 @@ def create_avatar(
     """
     Create a new custom avatar.
     """
-    # Check if user has reached their avatar limit
-    avatar_count = db.query(Avatar).filter(Avatar.user_id == current_user.id).count()
-    
-    # Get user's subscription to determine limits
-    subscription = (
-        db.query(Subscription)
-        .filter(Subscription.user_id == current_user.id, Subscription.is_active == True)
-        .first()
-    )
-    
-    # Set limits based on subscription
-    if subscription and subscription.type == SubscriptionType.PREMIUM:
-        max_avatars = 10  # Premium users can have more avatars
-    else:
-        max_avatars = 3  # Basic users have limited avatars
-    
-    if avatar_count >= max_avatars:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"You have reached your limit of {max_avatars} avatars. Upgrade your subscription to create more.",
+    try:
+        # Check if user has reached their avatar limit
+        avatar_count = db.query(Avatar).filter(Avatar.user_id == current_user.id).count()
+        
+        # Get user's subscription to determine limits
+        subscription = (
+            db.query(Subscription)
+            .filter(Subscription.user_id == current_user.id, Subscription.is_active == True)
+            .first()
         )
-    
-    # Create new avatar
-    avatar = Avatar(
-        name=avatar_in.name,
-        description=avatar_in.description,
-        image_url=avatar_in.image_url,
-        provider=avatar_in.provider,
-        provider_id=avatar_in.provider_id,
-        behavior_settings={},  # Default empty settings
-        appearance_settings={},  # Default empty settings
-        voice_settings={},  # Default empty settings
-        is_predesigned=False,  # Custom avatar
-        is_public=False,  # Private by default
-        user_id=current_user.id,
-    )
-    
-    db.add(avatar)
-    db.commit()
-    db.refresh(avatar)
-    
-    return avatar
+        
+        # Set limits based on subscription
+        if subscription and subscription.type == SubscriptionType.PREMIUM:
+            max_avatars = 10  # Premium users can have more avatars
+        else:
+            max_avatars = 3  # Basic users have limited avatars
+        
+        if avatar_count >= max_avatars:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"You have reached your limit of {max_avatars} avatars. Upgrade your subscription to create more.",
+            )
+        
+        # Create new avatar
+        avatar = Avatar(
+            name=avatar_in.name,
+            description=avatar_in.description,
+            image_url=avatar_in.image_url,
+            provider=avatar_in.provider,
+            provider_id=avatar_in.provider_id,
+            behavior_settings={},  # Default empty settings
+            appearance_settings={},  # Default empty settings
+            voice_settings={},  # Default empty settings
+            is_predesigned=False,  # Custom avatar
+            is_public=False,  # Private by default
+            user_id=current_user.id,
+        )
+        
+        max_retries = 3
+        retry_delay = 1  # seconds
+        
+        for attempt in range(max_retries):
+            try:
+                db.add(avatar)
+                db.commit()
+                db.refresh(avatar)
+                return avatar
+            except (OperationalError, DBAPIError, DisconnectionError) as e:
+                if attempt < max_retries - 1:
+                    db.rollback()  # Important: rollback the transaction
+                    time.sleep(retry_delay)
+                    continue
+                else:
+                    # If all retries fail, raise a user-friendly error
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail="Database connection error, please try again",
+                    ) from e
+    except Exception as e:
+        # Catch any other unexpected errors
+        db.rollback()
+        if isinstance(e, HTTPException):
+            raise
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create avatar. Please try again.",
+        ) from e
 
 @router.get("/avatars/{avatar_id}", response_model=AvatarSchema)
 def get_avatar(

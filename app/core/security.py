@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
 from typing import Any, Union, Optional
+import time
 
 from jose import jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import OperationalError, DBAPIError, DisconnectionError
 
 from app.core.config import settings
 from app.db.session import get_db
@@ -61,15 +63,40 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    user = db.query(User).filter(User.id == user_id).first()
-    if user is None:
+    try:
+        # Add retry logic for database operations
+        max_retries = 3
+        retry_delay = 1  # seconds
+        last_error = None
+        
+        for attempt in range(max_retries):
+            try:
+                user = db.query(User).filter(User.id == user_id).first()
+                if user is None:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="User not found",
+                        headers={"WWW-Authenticate": "Bearer"},
+                    )
+                return user
+            except (OperationalError, DBAPIError, DisconnectionError) as e:
+                last_error = e
+                if attempt < max_retries - 1:
+                    time.sleep(retry_delay)
+                    continue
+        
+        # If we've exhausted all retries, raise the last error
+        if last_error:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Database connection error, please try again",
+            ) from last_error
+    except Exception as e:
+        # Handle any other unexpected errors
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    return user
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Authentication error",
+        ) from e
 
 def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
     """

@@ -2,6 +2,7 @@ from sqlalchemy import text
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+import time
 
 from app.api.endpoints import (
     auth,
@@ -13,7 +14,8 @@ from app.api.endpoints import (
     chat,
     subscription,
     products,
-    bot
+    bot,
+    health
 )
 from app.core.config import settings
 from app.db.session import get_db, engine
@@ -48,6 +50,7 @@ app.include_router(chat.router, prefix=f"{settings.API_V1_STR}/chat", tags=["cha
 app.include_router(subscription.router, prefix=f"{settings.API_V1_STR}/subscription", tags=["subscription"])
 app.include_router(products.router, prefix=f"{settings.API_V1_STR}/products", tags=["products"])
 app.include_router(bot.router, prefix=f"{settings.API_V1_STR}/bot", tags=["bot"])
+app.include_router(health.router, prefix=f"{settings.API_V1_STR}/health", tags=["health"])
 
 
 @app.get("/")
@@ -66,7 +69,9 @@ def health_check(db: Session = Depends(get_db)):
 
     return {
         "status": "healthy",
-        "database": db_status
+        "database": db_status,
+        "version": "0.1.0",
+        "timestamp": time.time()
     }
 
 

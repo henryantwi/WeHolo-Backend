@@ -73,21 +73,28 @@ def update_preferences(
     """
     Update user preferences.
     """
+    # Query the user from the database to ensure we're working with a session-bound instance
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
     if "language" in preferences:
-        current_user.language = preferences["language"]
+        user.language = preferences["language"]
     
     if "ui_theme" in preferences:
-        current_user.ui_theme = preferences["ui_theme"]
+        user.ui_theme = preferences["ui_theme"]
     
     if "camera_mode" in preferences:
-        current_user.camera_mode = preferences["camera_mode"]
+        user.camera_mode = preferences["camera_mode"]
     
-    db.add(current_user)
     db.commit()
-    db.refresh(current_user)
+    db.refresh(user)
     
     return {
-        "language": current_user.language,
-        "ui_theme": current_user.ui_theme,
-        "camera_mode": current_user.camera_mode,
+        "language": user.language,
+        "ui_theme": user.ui_theme,
+        "camera_mode": user.camera_mode,
     }
