@@ -19,7 +19,7 @@ RUN mkdir -p /app/data
 EXPOSE 8000
 
 # Set environment variable to use PostgreSQL by default
-ENV DATABASE_URL="postgresql://weholo:weholo@db:5432/weholo"
+# ENV DATABASE_URL="postgresql://weholo:weholo@db:5432/weholo"
 
 # Use the entrypoint script
 CMD ["/app/scripts/entrypoint.sh"]
