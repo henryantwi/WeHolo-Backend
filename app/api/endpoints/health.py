@@ -45,7 +45,7 @@ def db_health_check(db: Session = Depends(get_db)) -> Any:
     """
     try:
         # Execute a simple query to check the database connection
-        result = db.execute("SELECT 1").scalar()
+        result = db.execute(text("SELECT 1")).scalar()
         
         if result == 1:
             return {
