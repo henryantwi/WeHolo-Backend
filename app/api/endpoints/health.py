@@ -4,6 +4,7 @@ import time
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import OperationalError, DBAPIError, DisconnectionError
+from sqlalchemy import text
 
 from app.api.deps import get_db
 from app.db.session import engine
@@ -11,13 +12,30 @@ from app.db.session import engine
 router = APIRouter()
 
 @router.get("/", response_model=Dict[str, Any])
-def health_check() -> Any:
+def health_check(db: Session = Depends(get_db)) -> Any:
     """
-    Basic health check endpoint.
+    Basic health check endpoint with database connection test.
     """
+    db_status = "ok"
+    db_message = "Connected to database"
+    
+    try:
+        # Test database connection
+        result = db.execute(text("SELECT 1")).scalar()
+        if result != 1:
+            db_status = "error"
+            db_message = "Database connection test failed"
+    except (OperationalError, DBAPIError, DisconnectionError) as e:
+        db_status = "error"
+        db_message = f"Database error: {str(e)}"
+        
     return {
         "status": "ok",
-        "message": "Service is running"
+        "message": "Service is running",
+        "database": {
+            "status": db_status,
+            "message": db_message
+        }
     }
 
 @router.get("/db", response_model=Dict[str, Any])
