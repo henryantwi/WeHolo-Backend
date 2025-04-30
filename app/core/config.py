@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     
     # Database
-    DATABASE_URL: str = "sqlite:///./weholo.db"
+    DATABASE_URL: str = "postgresql://weholo:weholo@db:5432/weholo"
     
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["*"]

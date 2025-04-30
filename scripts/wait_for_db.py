@@ -16,16 +16,24 @@ backoff_factor = 1.5  # Exponential backoff
 def main():
     """Wait for the database to be ready."""
     logger.info("Waiting for database to be ready...")
+    logger.info(f"Trying to connect to: {settings.DATABASE_URL}")
     
     current_interval = retry_interval
     
     for i in range(max_retries):
         try:
-            # Try to connect to the database with timeout
-            engine = create_engine(
-                settings.DATABASE_URL,
-                connect_args={"connect_timeout": 5}
-            )
+            # Determine if we're using PostgreSQL or SQLite
+            is_postgres = settings.DATABASE_URL.startswith('postgresql')
+            
+            # Create the engine with appropriate parameters based on the database type
+            if is_postgres:
+                engine = create_engine(
+                    settings.DATABASE_URL,
+                    connect_args={"connect_timeout": 5}
+                )
+            else:
+                engine = create_engine(settings.DATABASE_URL)
+                
             with engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
             logger.info("Database is ready!")
