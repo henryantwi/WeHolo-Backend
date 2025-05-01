@@ -1,6 +1,6 @@
 services:
   web:
-    image: ghcr.io/henryantwi/weholo:v1.0.2
+    build: .
     ports:
       - "8000:8000"
     depends_on:
@@ -8,8 +8,6 @@ services:
         condition: service_healthy
     env_file:
       - .env.web
-    environment:
-      - DATABASE_URL=postgresql://weholo:weholo@db:5432/weholo
     volumes:
       - ./:/app
     restart: always
@@ -27,10 +25,6 @@ services:
       - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
     env_file:
       - .env.db
-    environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=postgres
     ports:
       - "5432:5432"
     restart: always
